@@ -20,7 +20,7 @@ import {
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Aside } from "@/components/aside";
 import { MobileAside } from "@/components/mobile-aside";
-import { User, useUserActions } from "@/hooks/users-hooks";
+import { User, useUsers } from "@/hooks/users-hooks";
 import { Loading } from "@/components/loading";
 import { navLinks } from "./theses";
 import { Pagination } from "@/components/pagination";
@@ -30,7 +30,7 @@ import { useState } from "react";
 import { ConfirmationDialog } from "@/components/confirm-dialog";
 
 export function Users() {
-  const { getUsers, deleteUser } = useUserActions();
+  const { getUsers, deleteUser } = useUsers();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deletingUser, setDeletingUser] = useState<string>("");
