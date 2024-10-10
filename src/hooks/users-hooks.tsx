@@ -30,22 +30,23 @@ export const createUserSchema = z.object({
   name: z.string().min(1, "O nome é obrigatório"),
 });
 export const updateUserSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().uuid().optional(),
   email: z
     .string({
       required_error: "Email é obrigatório",
       invalid_type_error: "Email deve ser uma string",
     })
-    .email("Email inválido"),
-  password: z.string().optional(),
-  registration: z.string().min(1, "A matrícula é obrigatória"),
-  name: z.string().min(1, "O nome é obrigatório"),
+    .email("Email inválido")
+    .optional(),
+  password: z.string().optional().optional(),
+  registration: z.string().min(1, "A matrícula é obrigatória").optional(),
+  name: z.string().min(1, "O nome é obrigatório").optional(),
 });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
-export function useUserActions() {
+export function useUsers() {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
@@ -77,7 +78,7 @@ export function useUserActions() {
   });
 
   const updateUser = useMutation({
-    mutationFn: async (user: User) => {
+    mutationFn: async (user: UpdateUserInput) => {
       await api.put(`/users/${user.id}/update`, user);
     },
     onSuccess: () => {

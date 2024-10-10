@@ -1,12 +1,10 @@
 import {
   BookCopy,
   BookOpenCheck,
-  MoreHorizontal,
   Pencil,
   PlusCircle,
-  SquareArrowOutUpRight,
+  SquareUserRound,
   Trash,
-  Trash2Icon,
   Users2,
 } from "lucide-react";
 
@@ -36,7 +34,7 @@ import { Pagination } from "@/components/pagination";
 
 export const navLinks = [
   { icon: <BookOpenCheck />, label: "Trabalhos", to: "/admin" },
-  { icon: <BookCopy />, label: "Orientadores", to: "/admin/advisors" },
+  { icon: <SquareUserRound />, label: "Orientadores", to: "/admin/advisors" },
   { icon: <Users2 />, label: "Usuários", to: "/admin/users" },
 ];
 
@@ -96,13 +94,6 @@ export function Theses() {
                             <TableCell>{thesis.author.name}</TableCell>
                             <TableCell>{thesis.author.advisor.name}</TableCell>
                             <TableCell>
-                              <Button
-                                size="icon"
-                                variant="link"
-                                className="h-8"
-                              >
-                                <SquareArrowOutUpRight />
-                              </Button>
                               <Button
                                 size="icon"
                                 variant="link"

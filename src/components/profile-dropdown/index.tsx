@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -55,7 +55,9 @@ export function ProfileDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align}>
-        <DropdownMenuLabel>Olá, {user.name}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          Olá, {user ? user.name : "usuário"}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Profile</DropdownMenuItem>
         <DropdownMenuSeparator />

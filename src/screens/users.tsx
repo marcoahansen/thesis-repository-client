@@ -25,18 +25,32 @@ import { Loading } from "@/components/loading";
 import { navLinks } from "./theses";
 import { Pagination } from "@/components/pagination";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { CreateUserFormSheet } from "@/components/create-user-form-sheet";
+import { UserFormSheet } from "@/components/user-form-sheet";
 import { useState } from "react";
+import { ConfirmationDialog } from "@/components/confirm-dialog";
 
 export function Users() {
-  const { getUsers } = useUserActions();
+  const { getUsers, deleteUser } = useUserActions();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState<string>("");
+  const [openDialog, setOpenDialog] = useState(false);
 
   const { data: usersResponse, isLoading } = getUsers;
+  const { mutate: deleteUserMutate } = deleteUser;
 
   function onCloseSheet() {
     setIsSheetOpen(false);
+  }
+
+  function openUserSheet(user: User) {
+    setEditingUser(user);
+    setIsSheetOpen(true);
+  }
+
+  function onDeleteUser(id: string) {
+    setDeletingUser(id);
+    setOpenDialog(true);
   }
 
   if (isLoading) {
@@ -60,7 +74,7 @@ export function Users() {
                       </span>
                     </Button>
                   </SheetTrigger>
-                  <CreateUserFormSheet onClose={onCloseSheet} />
+                  <UserFormSheet user={editingUser} onClose={onCloseSheet} />
                 </Sheet>
               </div>
             </div>
@@ -94,7 +108,7 @@ export function Users() {
                           <TableCell>{user.registration}</TableCell>
                           <TableCell>
                             <Button
-                              // onClick={() => openUserSheet(user)}
+                              onClick={() => openUserSheet(user)}
                               size="icon"
                               variant="link"
                               className="h-8"
@@ -106,7 +120,7 @@ export function Users() {
                               variant="ghost"
                               className="h-8"
                               onClick={() => {
-                                console.log("delete", user.id);
+                                onDeleteUser(user.id);
                               }}
                             >
                               <Trash color="red" />
@@ -131,6 +145,12 @@ export function Users() {
           </Tabs>
         </main>
       </div>
+      <ConfirmationDialog
+        open={openDialog}
+        onDelete={() => deleteUserMutate(deletingUser)}
+        setOpen={setOpenDialog}
+        item="usuário"
+      />
     </div>
   );
 }

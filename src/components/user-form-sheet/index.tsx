@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -14,27 +13,60 @@ import {
 import {
   CreateUserInput,
   createUserSchema,
-  useUserActions,
+  UpdateUserInput,
+  updateUserSchema,
+  User,
+  useUsers,
 } from "@/hooks/users-hooks";
 import { inputError } from "@/helpers/input-error";
-import { X } from "lucide-react";
+import { useEffect } from "react";
 
-export function CreateUserFormSheet({ onClose }: { onClose: () => void }) {
-  const { createUser } = useUserActions();
-
+export function UserFormSheet({
+  onClose,
+  user,
+}: {
+  onClose: () => void;
+  user: User | null;
+}) {
+  const { createUser, updateUser } = useUsers();
   const { mutate: createUserMutate } = createUser;
+  const { mutate: updateUserMutate } = updateUser;
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
     reset,
-  } = useForm<CreateUserInput>({
-    resolver: zodResolver(createUserSchema),
+    setValue,
+    trigger,
+  } = useForm<CreateUserInput | UpdateUserInput>({
+    resolver: zodResolver(user ? updateUserSchema : createUserSchema),
   });
 
-  const onSubmit = (data: CreateUserInput) => {
-    createUserMutate(data, {
+  useEffect(() => {
+    if (user) {
+      setValue("name", user.name);
+      setValue("email", user.email);
+      setValue("registration", user.registration);
+      trigger();
+    }
+  }, [user, setValue, trigger]);
+
+  const onSubmit = (data: CreateUserInput | UpdateUserInput) => {
+    console.log("Form Data", data);
+    if (user) {
+      const removeEmptyFields = (user: UpdateUserInput) =>
+        Object.fromEntries(
+          Object.entries(user).filter(([_, v]) => v != null && v !== "")
+        );
+      const normalizedData = removeEmptyFields(data) as UpdateUserInput;
+      updateUserMutate(
+        { ...normalizedData, id: user.id },
+        { onSuccess: onClose }
+      );
+      return;
+    }
+    createUserMutate(data as CreateUserInput, {
       onSuccess: () => {
         reset();
         onClose();
@@ -42,23 +74,17 @@ export function CreateUserFormSheet({ onClose }: { onClose: () => void }) {
     });
   };
 
+  console.log("Form Errors", errors);
+
   return (
     <SheetContent>
-      <SheetClose
-        onClick={() => {
-          onClose();
-          reset();
-        }}
-        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
-      >
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </SheetClose>
       <SheetHeader>
-        <SheetTitle>Criar Novo Usuário</SheetTitle>
+        <SheetTitle>
+          {user ? "Editar Usuário" : "Criar Novo Usuário"}
+        </SheetTitle>
         <SheetDescription>
-          Preencha as informações abaixo para adicionar um novo usuário ao
-          sistema.
+          Preencha as informações abaixo para {user ? "editar" : "adicionar"} um
+          usuário ao sistema.
         </SheetDescription>
       </SheetHeader>
 
@@ -77,7 +103,6 @@ export function CreateUserFormSheet({ onClose }: { onClose: () => void }) {
               className="col-span-3"
             />
           </div>
-
           <div className="grid gap-1">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -114,7 +139,7 @@ export function CreateUserFormSheet({ onClose }: { onClose: () => void }) {
         <SheetFooter className="grid grid-cols-3 items-center gap-1">
           <Button
             variant="outline"
-            type="button"
+            type="reset"
             onClick={() => {
               onClose();
               reset();
