@@ -1,4 +1,4 @@
-import { useLogout, useUserData } from "@/hooks/user-hooks";
+import { useUserHook } from "@/hooks/user-hooks";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,8 +20,9 @@ export function ProfileDropdown({
   align?: "start" | "end";
   hidden?: string;
 }) {
-  const { data: user, isLoading } = useUserData();
-  const { mutate } = useLogout();
+  const { me, logout } = useUserHook();
+  const { data: user, isLoading } = me();
+  const { mutate } = logout();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

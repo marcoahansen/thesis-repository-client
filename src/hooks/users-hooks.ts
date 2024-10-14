@@ -4,7 +4,6 @@ import { useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
 
-// Define User interfaces and validation schema
 export interface User {
   id: string;
   name: string;
@@ -31,16 +30,10 @@ export const createUserSchema = z.object({
 });
 export const updateUserSchema = z.object({
   id: z.string().uuid().optional(),
-  email: z
-    .string({
-      required_error: "Email é obrigatório",
-      invalid_type_error: "Email deve ser uma string",
-    })
-    .email("Email inválido")
-    .optional(),
-  password: z.string().optional().optional(),
-  registration: z.string().min(1, "A matrícula é obrigatória").optional(),
-  name: z.string().min(1, "O nome é obrigatório").optional(),
+  email: z.string().optional(),
+  password: z.string().optional(),
+  registration: z.string().optional(),
+  name: z.string().optional(),
 });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;
@@ -53,11 +46,16 @@ export function useUsers() {
   const currentPage = Number(searchParams.get("page") || 1);
   const take = Number(searchParams.get("take") || 10);
   const skip = (currentPage - 1) * take;
+  const search = searchParams.get("search") || "";
+  const orderBy = searchParams.get("orderBy") || "name";
+  const sort = searchParams.get("sort") || "asc";
 
   const getUsers = useQuery<UsersResponse>({
-    queryKey: ["users", currentPage, take],
+    queryKey: ["users", currentPage, take, search, orderBy, sort],
     queryFn: async () => {
-      const response = await api.get(`/users?skip=${skip}&take=${take}`);
+      const response = await api.get(
+        `/users?skip=${skip}&take=${take}&search=${search}&orderBy=${orderBy}&sort=${sort}`
+      );
       return response.data;
     },
   });
@@ -97,6 +95,7 @@ export function useUsers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users", currentPage, take] });
+      toast.success("Usuário deletado com sucesso");
     },
     onError: (error) => {
       console.error("Erro ao deletar usuário:", error);

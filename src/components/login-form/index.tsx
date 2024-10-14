@@ -1,5 +1,4 @@
 import { inputError } from "@/helpers/input-error";
-import { useLogin } from "@/hooks/user-hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@radix-ui/react-label";
 import { useForm } from "react-hook-form";
@@ -16,6 +15,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Input } from "../ui/input";
+import { useUserHook } from "@/hooks/user-hooks";
 
 const loginSchema = z.object({
   email: z
@@ -30,7 +30,8 @@ const loginSchema = z.object({
 type LoginSchema = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const { mutate } = useLogin();
+  const { login } = useUserHook();
+  const { mutate } = login();
   const navigate = useNavigate();
 
   const {

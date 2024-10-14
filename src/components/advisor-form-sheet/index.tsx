@@ -10,28 +10,29 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  CreateUserInput,
-  createUserSchema,
-  UpdateUserInput,
-  updateUserSchema,
-  User,
-  useUsers,
-} from "@/hooks/users-hooks";
+
 import { inputError } from "@/helpers/input-error";
 import { useEffect } from "react";
+import {
+  Advisor,
+  CreateAdvisorInput,
+  createAdvisorSchema,
+  UpdateAdvisorInput,
+  updateAdvisorSchema,
+  useAdvisors,
+} from "@/hooks/advisors-hooks";
 import { removeEmptyFields } from "@/helpers/remove-empty-fields";
 
-export function UserFormSheet({
+export function AdvisorFormSheet({
   onClose,
-  user,
+  advisor,
 }: {
   onClose: () => void;
-  user: User | null;
+  advisor: Advisor | null;
 }) {
-  const { createUser, updateUser } = useUsers();
-  const { mutate: createUserMutate } = createUser;
-  const { mutate: updateUserMutate } = updateUser;
+  const { createAdvisor, updateAdvisor } = useAdvisors();
+  const { mutate: createAdvisorMutate } = createAdvisor;
+  const { mutate: updateAdvisorMutate } = updateAdvisor;
 
   const {
     register,
@@ -40,34 +41,34 @@ export function UserFormSheet({
     reset,
     setValue,
     trigger,
-  } = useForm<CreateUserInput | UpdateUserInput>({
-    resolver: zodResolver(user ? updateUserSchema : createUserSchema),
+  } = useForm<CreateAdvisorInput | UpdateAdvisorInput>({
+    resolver: zodResolver(advisor ? updateAdvisorSchema : createAdvisorSchema),
   });
 
   useEffect(() => {
-    if (user) {
-      setValue("name", user.name);
-      setValue("email", user.email);
-      setValue("registration", user.registration);
+    if (advisor) {
+      setValue("name", advisor.name);
+      setValue("email", advisor.email);
+      setValue("registration", advisor.registration);
       trigger();
     }
-  }, [user, setValue, trigger]);
+  }, [advisor, setValue, trigger]);
 
-  const onSubmit = (data: CreateUserInput | UpdateUserInput) => {
-    if (user) {
-      const normalizedData = removeEmptyFields(data) as UpdateUserInput;
-      updateUserMutate(
-        { ...normalizedData, id: user.id },
+  const onSubmit = (data: CreateAdvisorInput | UpdateAdvisorInput) => {
+    if (advisor) {
+      const normalizedData = removeEmptyFields(data) as UpdateAdvisorInput;
+      updateAdvisorMutate(
+        { ...normalizedData, id: advisor.id },
         {
           onSuccess: () => {
-            reset();
             onClose();
+            reset();
           },
         }
       );
       return;
     }
-    createUserMutate(data as CreateUserInput, {
+    createAdvisorMutate(data as CreateAdvisorInput, {
       onSuccess: () => {
         reset();
         onClose();
@@ -79,11 +80,11 @@ export function UserFormSheet({
     <SheetContent>
       <SheetHeader>
         <SheetTitle>
-          {user ? "Editar Usuário" : "Criar Novo Usuário"}
+          {advisor ? "Editar Orientador" : "Criar Novo Orientador"}
         </SheetTitle>
         <SheetDescription>
-          Preencha as informações abaixo para {user ? "editar" : "adicionar"} um
-          usuário ao sistema.
+          Preencha as informações abaixo para {advisor ? "editar" : "adicionar"}{" "}
+          um orientador ao sistema.
         </SheetDescription>
       </SheetHeader>
 
@@ -110,17 +111,6 @@ export function UserFormSheet({
               placeholder="email@email.com"
               {...register("email")}
               className="col-span-3"
-            />
-          </div>
-          <div className="grid gap-1">
-            <Label htmlFor="password">Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="****"
-              {...register("password")}
-              className="col-span-3"
-              error={inputError(errors, "password")}
             />
           </div>
           <div className="grid gap-1">
@@ -152,7 +142,7 @@ export function UserFormSheet({
             type="submit"
             disabled={isSubmitting || !isDirty}
           >
-            {isSubmitting ? "Salvando..." : "Salvar Usuário"}
+            {isSubmitting ? "Salvando..." : "Salvar Orientador"}
           </Button>
         </SheetFooter>
       </form>

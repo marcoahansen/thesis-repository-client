@@ -1,7 +1,7 @@
 // PublicRoute.tsx
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { useUserData } from "@/hooks/user-hooks";
+import { useUserHook } from "@/hooks/user-hooks";
 import { toast } from "sonner";
 import { Loading } from "@/components/loading";
 
@@ -10,7 +10,8 @@ interface PublicRouteProps {
 }
 
 export function PublicRoute({ children }: PublicRouteProps) {
-  const { data: user, isLoading } = useUserData();
+  const { me } = useUserHook();
+  const { data: user, isLoading } = me();
 
   if (isLoading) {
     return <Loading />;

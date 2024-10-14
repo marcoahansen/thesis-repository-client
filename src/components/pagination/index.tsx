@@ -19,16 +19,25 @@ export function Pagination({ totalPages, total }: PaginationProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = Number(searchParams.get("page") || 1);
   const [take, setTake] = useState(Number(searchParams.get("take") || 10));
+  const search = searchParams.get("search") || "";
+  const orderBy = searchParams.get("orderBy") || "year";
+  const sort = searchParams.get("sort") || "asc";
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
-      setSearchParams({ page: String(newPage), take: String(take) });
+      setSearchParams({
+        page: String(newPage),
+        take: String(take),
+        search,
+        orderBy,
+        sort,
+      });
     }
   };
 
   const handleTakeChange = (newTake: string) => {
     setTake(Number(newTake));
-    setSearchParams({ page: "1", take: newTake });
+    setSearchParams({ page: "1", take: newTake, search, orderBy, sort });
   };
 
   return (

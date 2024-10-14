@@ -1,14 +1,5 @@
-import {
-  BookCopy,
-  BookOpenCheck,
-  File,
-  ListFilter,
-  MoreHorizontal,
-  PlusCircle,
-  Users2,
-} from "lucide-react";
+import { Pencil, PlusCircle, Trash } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,15 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Table,
   TableBody,
   TableCell,
@@ -35,16 +17,49 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Aside } from "@/components/aside";
 import { MobileAside } from "@/components/mobile-aside";
 import { Loading } from "@/components/loading";
-import { useAdvisors } from "@/hooks/advisors-hooks";
+import { Advisor, useAdvisors } from "@/hooks/advisors-hooks";
 import { navLinks } from "./theses";
 import { Pagination } from "@/components/pagination";
+import { useState } from "react";
+import { AdvisorFormSheet } from "@/components/advisor-form-sheet";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { ConfirmationDialog } from "@/components/confirm-dialog";
+import { EmptyResult } from "@/components/empty-result";
+import { SearchBar } from "@/components/search-bar";
+
+const orderByOptions = [
+  { value: "name", label: "Nome" },
+  { value: "email", label: "E-mail" },
+  { value: "registration", label: "Matrícula" },
+];
 
 export function Advisors() {
-  const { data: advisorsResponse, isLoading } = useAdvisors();
+  const { getAdvisors, deleteAdvisor } = useAdvisors();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editingAdvisor, setEditingAdvisor] = useState<Advisor | null>(null);
+  const [deletingAdvisor, setDeletingAdvisor] = useState<string>("");
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const { data: advisorsResponse, isLoading } = getAdvisors;
+  const { mutate: deleteAdvisorMutate } = deleteAdvisor;
+
+  function onCloseSheet() {
+    setIsSheetOpen(false);
+    setEditingAdvisor(null);
+  }
+
+  function openAdvisorSheet(advisor: Advisor) {
+    setEditingAdvisor(advisor);
+    setIsSheetOpen(true);
+  }
+
+  function onDeleteAdvisor(id: string) {
+    setDeletingAdvisor(id);
+    setOpenDialog(true);
+  }
 
   if (isLoading) {
     return <Loading />;
@@ -55,127 +70,100 @@ export function Advisors() {
       <MobileAside links={navLinks} />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs defaultValue="all">
-            <div className="flex items-center">
-              {/* <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="draft">Draft</TabsTrigger>
-                <TabsTrigger value="archived" className="hidden sm:flex">
-                  Archived
-                </TabsTrigger>
-              </TabsList> */}
-              <div className="ml-auto flex items-center gap-2">
-                {/* <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                      <ListFilter className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Filter
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem checked>
-                      Active
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem>
-                      Archived
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu> */}
-                {/* <Button size="sm" variant="outline" className="h-8 gap-1">
-                  <File className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Export
-                  </span>
-                </Button> */}
-                <Button size="sm" className="h-8 gap-1">
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Adicionar Orientador
-                  </span>
-                </Button>
-              </div>
+          <div className="flex items-center">
+            <div className="ml-auto flex items-center gap-2">
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button size="sm" className="h-8 gap-1">
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Adicionar Orientador
+                    </span>
+                  </Button>
+                </SheetTrigger>
+                <AdvisorFormSheet
+                  advisor={editingAdvisor}
+                  onClose={onCloseSheet}
+                />
+              </Sheet>
             </div>
-            <TabsContent value="all">
-              <Card x-chunk="dashboard-06-chunk-0">
-                <CardHeader>
-                  <CardTitle>Orientadores</CardTitle>
-                  <CardDescription>
-                    Faça a gestão dos orientadores do sistema
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        {/* <TableHead className="hidden w-[100px] sm:table-cell">
-                          <span className="sr-only">Image</span>
-                        </TableHead> */}
-                        <TableHead>Nome</TableHead>
-                        <TableHead>Matrícula</TableHead>
-                        <TableHead>
-                          <span className="sr-only">Ações</span>
-                        </TableHead>
+          </div>
+          <Card x-chunk="dashboard-06-chunk-0">
+            <CardHeader>
+              <CardTitle>Orientadores</CardTitle>
+              <CardDescription>
+                Faça a gestão dos orientadores do sistema
+              </CardDescription>
+              <SearchBar
+                orderByOptions={orderByOptions}
+                placeholder="Procure por nome, e-mail ou matrícula"
+              />
+            </CardHeader>
+            <CardContent>
+              {advisorsResponse && advisorsResponse?.advisors.length === 0 ? (
+                <EmptyResult />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>E-mail</TableHead>
+                      <TableHead>Matrícula</TableHead>
+                      <TableHead>
+                        <span className="sr-only">Ações</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {advisorsResponse?.advisors.map((advisor) => (
+                      <TableRow key={advisor.id}>
+                        <TableCell className="font-medium">
+                          {advisor.name}
+                        </TableCell>
+                        <TableCell>{advisor.email}</TableCell>
+                        <TableCell>{advisor.registration}</TableCell>
+                        <TableCell>
+                          <Button
+                            onClick={() => openAdvisorSheet(advisor)}
+                            size="icon"
+                            variant="link"
+                            className="h-8"
+                          >
+                            <Pencil />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8"
+                            onClick={() => {
+                              onDeleteAdvisor(advisor.id);
+                            }}
+                          >
+                            <Trash color="red" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {advisorsResponse?.advisors.map((advisor) => (
-                        <TableRow key={advisor.id}>
-                          {/* <TableCell className="hidden sm:table-cell">
-                          <img
-                            alt="Product image"
-                            className="aspect-square rounded-md object-cover"
-                            height="64"
-                            src="/placeholder.svg"
-                            width="64"
-                          />
-                        </TableCell> */}
-                          <TableCell className="font-medium">
-                            {advisor.name}
-                          </TableCell>
-                          <TableCell>{advisor.registration}</TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  aria-haspopup="true"
-                                  size="icon"
-                                  variant="ghost"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Toggle menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      ;
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <CardFooter>
-                  {advisorsResponse && (
-                    <Pagination
-                      totalPages={advisorsResponse.totalPages}
-                      total={advisorsResponse.total}
-                    />
-                  )}
-                </CardFooter>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+            <CardFooter>
+              {advisorsResponse && (
+                <Pagination
+                  totalPages={advisorsResponse.totalPages}
+                  total={advisorsResponse.total}
+                />
+              )}
+            </CardFooter>
+          </Card>
         </main>
+        <ConfirmationDialog
+          open={openDialog}
+          onDelete={() => deleteAdvisorMutate(deletingAdvisor)}
+          setOpen={setOpenDialog}
+          item="orientador"
+        />
       </div>
     </div>
   );

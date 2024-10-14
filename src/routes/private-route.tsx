@@ -1,9 +1,10 @@
 import { Navigate } from "react-router-dom";
-import { useUserData } from "@/hooks/user-hooks";
 import { Loading } from "@/components/loading";
+import { useUserHook } from "@/hooks/user-hooks";
 
 export function PrivateRoute({ children }: { children: JSX.Element }) {
-  const { data: user, isLoading } = useUserData();
+  const { me } = useUserHook();
+  const { data: user, isLoading } = me();
 
   if (isLoading) {
     return <Loading />;

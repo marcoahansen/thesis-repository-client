@@ -28,6 +28,14 @@ import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { UserFormSheet } from "@/components/user-form-sheet";
 import { useState } from "react";
 import { ConfirmationDialog } from "@/components/confirm-dialog";
+import { SearchBar } from "@/components/search-bar";
+import { EmptyResult } from "@/components/empty-result";
+
+const orderByOptions = [
+  { value: "name", label: "Nome" },
+  { value: "email", label: "E-mail" },
+  { value: "registration", label: "Matrícula" },
+];
 
 export function Users() {
   const { getUsers, deleteUser } = useUsers();
@@ -41,6 +49,7 @@ export function Users() {
 
   function onCloseSheet() {
     setIsSheetOpen(false);
+    setEditingUser(null);
   }
 
   function openUserSheet(user: User) {
@@ -62,87 +71,90 @@ export function Users() {
       <MobileAside links={navLinks} />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs defaultValue="all">
-            <div className="flex items-center">
-              <div className="ml-auto flex items-center gap-2">
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                  <SheetTrigger asChild>
-                    <Button size="sm" className="h-8 gap-1">
-                      <PlusCircle className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Adicionar Usuário
-                      </span>
-                    </Button>
-                  </SheetTrigger>
-                  <UserFormSheet user={editingUser} onClose={onCloseSheet} />
-                </Sheet>
-              </div>
+          <div className="flex items-center">
+            <div className="ml-auto flex items-center gap-2">
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button size="sm" className="h-8 gap-1">
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Adicionar Usuário
+                    </span>
+                  </Button>
+                </SheetTrigger>
+                <UserFormSheet user={editingUser} onClose={onCloseSheet} />
+              </Sheet>
             </div>
-            <TabsContent value="all">
-              <Card x-chunk="dashboard-06-chunk-0">
-                <CardHeader>
-                  <CardTitle>Usuários</CardTitle>
-                  <CardDescription>
-                    Faça a gestão dos usuários do sistema
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead>E-mail</TableHead>
-                        <TableHead>Matrícula</TableHead>
-                        <TableHead>
-                          <span className="sr-only">Ações</span>
-                        </TableHead>
+          </div>
+          <Card x-chunk="dashboard-06-chunk-0">
+            <CardHeader>
+              <CardTitle>Usuários</CardTitle>
+              <CardDescription>
+                Faça a gestão dos usuários do sistema
+              </CardDescription>
+              <SearchBar
+                orderByOptions={orderByOptions}
+                placeholder="Procure por nome, e-mail ou matrícula"
+              />
+            </CardHeader>
+            <CardContent>
+              {usersResponse && usersResponse.users.length === 0 ? (
+                <EmptyResult />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>E-mail</TableHead>
+                      <TableHead>Matrícula</TableHead>
+                      <TableHead>
+                        <span className="sr-only">Ações</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {usersResponse?.users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">
+                          {user.name}
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.registration}</TableCell>
+                        <TableCell>
+                          <Button
+                            onClick={() => openUserSheet(user)}
+                            size="icon"
+                            variant="link"
+                            className="h-8"
+                          >
+                            <Pencil />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8"
+                            onClick={() => {
+                              onDeleteUser(user.id);
+                            }}
+                          >
+                            <Trash color="red" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {usersResponse?.users.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">
-                            {user.name}
-                          </TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>{user.registration}</TableCell>
-                          <TableCell>
-                            <Button
-                              onClick={() => openUserSheet(user)}
-                              size="icon"
-                              variant="link"
-                              className="h-8"
-                            >
-                              <Pencil />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8"
-                              onClick={() => {
-                                onDeleteUser(user.id);
-                              }}
-                            >
-                              <Trash color="red" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      ;
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <CardFooter>
-                  {usersResponse && (
-                    <Pagination
-                      totalPages={usersResponse.totalPages}
-                      total={usersResponse.total}
-                    />
-                  )}
-                </CardFooter>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+            <CardFooter>
+              {usersResponse && (
+                <Pagination
+                  totalPages={usersResponse.totalPages}
+                  total={usersResponse.total}
+                />
+              )}
+            </CardFooter>
+          </Card>
         </main>
       </div>
       <ConfirmationDialog

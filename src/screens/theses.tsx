@@ -1,5 +1,4 @@
 import {
-  BookCopy,
   BookOpenCheck,
   Pencil,
   PlusCircle,
@@ -7,7 +6,6 @@ import {
   Trash,
   Users2,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,12 +23,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Aside } from "@/components/aside";
 import { MobileAside } from "@/components/mobile-aside";
 import { Loading } from "@/components/loading";
-import { useDeleteThesis, useTheses } from "@/hooks/theses-hooks";
+import { Thesis, useTheses } from "@/hooks/theses-hooks";
 import { Pagination } from "@/components/pagination";
+import { ConfirmationDialog } from "@/components/confirm-dialog";
+import { useState } from "react";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { ThesisFormSheet } from "@/components/thesis-form-sheet";
+import { SearchBar } from "@/components/search-bar";
+import { EmptyResult } from "@/components/empty-result";
 
 export const navLinks = [
   { icon: <BookOpenCheck />, label: "Trabalhos", to: "/admin" },
@@ -38,9 +41,36 @@ export const navLinks = [
   { icon: <Users2 />, label: "Usuários", to: "/admin/users" },
 ];
 
+const orderByOptions = [
+  { value: "year", label: "Ano" },
+  { value: "title", label: "Título" },
+  { value: "author", label: "Autor" },
+  { value: "advisor", label: "Orientador" },
+];
+
 export function Theses() {
-  const { data: thesesResponse, isLoading } = useTheses();
-  const { mutate } = useDeleteThesis();
+  const { getTheses, deleteThesis } = useTheses();
+  const { data: thesesResponse, isLoading } = getTheses();
+  const { mutate: deleteThesisMutate } = deleteThesis();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editingThesis, setEditingThesis] = useState<Thesis | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [deletingThesis, setDeletingThesis] = useState<string>("");
+
+  function onDeleteThesis(id: string) {
+    setDeletingThesis(id);
+    setOpenDialog(true);
+  }
+
+  function onCloseSheet() {
+    setIsSheetOpen(false);
+    setEditingThesis(null);
+  }
+
+  function openThesisSheet(thesis: Thesis) {
+    setEditingThesis(thesis);
+    setIsSheetOpen(true);
+  }
 
   if (isLoading) {
     return <Loading />;
@@ -50,87 +80,104 @@ export function Theses() {
       <Aside links={navLinks} />
       <MobileAside links={navLinks} />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs defaultValue="all">
-            <div className="flex items-center">
-              <div className="ml-auto flex items-center gap-2">
-                <Button size="sm" className="h-8 gap-1">
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Novo Trabalho
-                  </span>
-                </Button>
-              </div>
+        <main className="grid flex-1 items-start gap-1 p-4 sm:px-6 sm:py-0 md:gap-5">
+          <div className="flex items-center">
+            <div className="ml-auto flex items-center gap-2">
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button size="sm" className="h-8 gap-1">
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Novo Trabalho
+                    </span>
+                  </Button>
+                </SheetTrigger>
+                <ThesisFormSheet
+                  thesis={editingThesis}
+                  onClose={onCloseSheet}
+                />
+              </Sheet>
             </div>
-            <TabsContent value="all">
-              <Card x-chunk="dashboard-06-chunk-0">
-                <CardHeader>
-                  <CardTitle>Trabalhos de Conclusão</CardTitle>
-                  <CardDescription>
-                    Faça a gestão dos trabalhos do sistema
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Título</TableHead>
-                        <TableHead>Ano</TableHead>
-                        <TableHead>Autor</TableHead>
-                        <TableHead>Orientador</TableHead>
-                        <TableHead>
-                          <span className="sr-only">Ações</span>
-                        </TableHead>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Trabalhos de Conclusão</CardTitle>
+              <CardDescription>
+                Faça a gestão dos trabalhos do sistema
+              </CardDescription>
+              <SearchBar
+                orderByOptions={orderByOptions}
+                placeholder="Procure por título, ano, autor, orientador ou palavra-chave"
+              />
+            </CardHeader>
+            <CardContent>
+              {thesesResponse && thesesResponse?.thesis.length === 0 ? (
+                <EmptyResult />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Título</TableHead>
+                      <TableHead>Ano</TableHead>
+                      <TableHead>Autor</TableHead>
+                      <TableHead>Orientador</TableHead>
+                      <TableHead>
+                        <span className="sr-only">Ações</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {thesesResponse?.thesis.map((thesis) => (
+                      <TableRow key={thesis.id}>
+                        <TableCell className="font-medium">
+                          {thesis.title}
+                        </TableCell>
+                        <TableCell>{thesis.year}</TableCell>
+                        <TableCell>{thesis.author.name}</TableCell>
+                        <TableCell>{thesis.author.advisor.name}</TableCell>
+                        <TableCell>
+                          <Button
+                            onClick={() => openThesisSheet(thesis)}
+                            size="icon"
+                            variant="link"
+                            className="h-8"
+                          >
+                            <Pencil />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8"
+                            onClick={() => {
+                              onDeleteThesis(thesis.id);
+                            }}
+                          >
+                            <Trash color="red" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {thesesResponse &&
-                        thesesResponse.thesis.map((thesis) => (
-                          <TableRow key={thesis.id}>
-                            <TableCell className="font-medium">
-                              {thesis.title}
-                            </TableCell>
-                            <TableCell>{thesis.year}</TableCell>
-                            <TableCell>{thesis.author.name}</TableCell>
-                            <TableCell>{thesis.author.advisor.name}</TableCell>
-                            <TableCell>
-                              <Button
-                                size="icon"
-                                variant="link"
-                                className="h-8"
-                              >
-                                <Pencil />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8"
-                                onClick={() => {
-                                  mutate(thesis.id);
-                                }}
-                              >
-                                <Trash color="red" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      ;
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <CardFooter>
-                  {thesesResponse && (
-                    <Pagination
-                      totalPages={thesesResponse.totalPages}
-                      total={thesesResponse.total}
-                    />
-                  )}
-                </CardFooter>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+            <CardFooter>
+              {thesesResponse && (
+                <Pagination
+                  totalPages={thesesResponse.totalPages}
+                  total={thesesResponse.total}
+                />
+              )}
+            </CardFooter>
+          </Card>
         </main>
       </div>
+      <ConfirmationDialog
+        open={openDialog}
+        onDelete={() => deleteThesisMutate(deletingThesis)}
+        setOpen={setOpenDialog}
+        item="usuário"
+      />
     </div>
   );
 }
