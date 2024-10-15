@@ -25,7 +25,6 @@ import { navLinks } from "./theses";
 import { Pagination } from "@/components/pagination";
 import { useState } from "react";
 import { AdvisorFormSheet } from "@/components/advisor-form-sheet";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { ConfirmationDialog } from "@/components/confirm-dialog";
 import { EmptyResult } from "@/components/empty-result";
 import { SearchBar } from "@/components/search-bar";
@@ -51,7 +50,7 @@ export function Advisors() {
     setEditingAdvisor(null);
   }
 
-  function openAdvisorSheet(advisor: Advisor) {
+  function openAdvisorSheet(advisor: Advisor | null) {
     setEditingAdvisor(advisor);
     setIsSheetOpen(true);
   }
@@ -69,23 +68,24 @@ export function Advisors() {
       <Aside links={navLinks} />
       <MobileAside links={navLinks} />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-5">
           <div className="flex items-center">
             <div className="ml-auto flex items-center gap-2">
-              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button size="sm" className="h-8 gap-1">
-                    <PlusCircle className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Adicionar Orientador
-                    </span>
-                  </Button>
-                </SheetTrigger>
-                <AdvisorFormSheet
-                  advisor={editingAdvisor}
-                  onClose={onCloseSheet}
-                />
-              </Sheet>
+              <Button
+                onClick={() => openAdvisorSheet(null)}
+                size="sm"
+                className="h-8 gap-1"
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Adicionar Orientador
+                </span>
+              </Button>
+              <AdvisorFormSheet
+                open={isSheetOpen}
+                advisor={editingAdvisor}
+                onClose={onCloseSheet}
+              />
             </div>
           </div>
           <Card x-chunk="dashboard-06-chunk-0">

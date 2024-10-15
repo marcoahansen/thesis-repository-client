@@ -30,7 +30,6 @@ import { Thesis, useTheses } from "@/hooks/theses-hooks";
 import { Pagination } from "@/components/pagination";
 import { ConfirmationDialog } from "@/components/confirm-dialog";
 import { useState } from "react";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { ThesisFormSheet } from "@/components/thesis-form-sheet";
 import { SearchBar } from "@/components/search-bar";
 import { EmptyResult } from "@/components/empty-result";
@@ -67,7 +66,7 @@ export function Theses() {
     setEditingThesis(null);
   }
 
-  function openThesisSheet(thesis: Thesis) {
+  function openThesisSheet(thesis: Thesis | null) {
     setEditingThesis(thesis);
     setIsSheetOpen(true);
   }
@@ -83,20 +82,21 @@ export function Theses() {
         <main className="grid flex-1 items-start gap-1 p-4 sm:px-6 sm:py-0 md:gap-5">
           <div className="flex items-center">
             <div className="ml-auto flex items-center gap-2">
-              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button size="sm" className="h-8 gap-1">
-                    <PlusCircle className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Novo Trabalho
-                    </span>
-                  </Button>
-                </SheetTrigger>
-                <ThesisFormSheet
-                  thesis={editingThesis}
-                  onClose={onCloseSheet}
-                />
-              </Sheet>
+              <Button
+                onClick={() => openThesisSheet(null)}
+                size="sm"
+                className="h-8 gap-1"
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Novo Trabalho
+                </span>
+              </Button>
+              <ThesisFormSheet
+                open={isSheetOpen}
+                thesis={editingThesis}
+                onClose={onCloseSheet}
+              />
             </div>
           </div>
           <Card>

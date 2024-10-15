@@ -17,14 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Aside } from "@/components/aside";
 import { MobileAside } from "@/components/mobile-aside";
 import { User, useUsers } from "@/hooks/users-hooks";
 import { Loading } from "@/components/loading";
 import { navLinks } from "./theses";
 import { Pagination } from "@/components/pagination";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { UserFormSheet } from "@/components/user-form-sheet";
 import { useState } from "react";
 import { ConfirmationDialog } from "@/components/confirm-dialog";
@@ -52,7 +50,7 @@ export function Users() {
     setEditingUser(null);
   }
 
-  function openUserSheet(user: User) {
+  function openUserSheet(user: User | null) {
     setEditingUser(user);
     setIsSheetOpen(true);
   }
@@ -70,20 +68,24 @@ export function Users() {
       <Aside links={navLinks} />
       <MobileAside links={navLinks} />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-5">
           <div className="flex items-center">
             <div className="ml-auto flex items-center gap-2">
-              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button size="sm" className="h-8 gap-1">
-                    <PlusCircle className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Adicionar Usuário
-                    </span>
-                  </Button>
-                </SheetTrigger>
-                <UserFormSheet user={editingUser} onClose={onCloseSheet} />
-              </Sheet>
+              <Button
+                onClick={() => openUserSheet(null)}
+                size="sm"
+                className="h-8 gap-1"
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Adicionar Usuário
+                </span>
+              </Button>
+              <UserFormSheet
+                open={isSheetOpen}
+                user={editingUser}
+                onClose={onCloseSheet}
+              />
             </div>
           </div>
           <Card x-chunk="dashboard-06-chunk-0">

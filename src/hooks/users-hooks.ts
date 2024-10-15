@@ -17,24 +17,39 @@ export interface UsersResponse {
   totalPages: number;
 }
 
-export const createUserSchema = z.object({
-  email: z
-    .string({
-      required_error: "Email é obrigatório",
-      invalid_type_error: "Email deve ser uma string",
-    })
-    .email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-  registration: z.string().min(1, "A matrícula é obrigatória"),
-  name: z.string().min(1, "O nome é obrigatório"),
-});
-export const updateUserSchema = z.object({
-  id: z.string().uuid().optional(),
-  email: z.string().optional(),
-  password: z.string().optional(),
-  registration: z.string().optional(),
-  name: z.string().optional(),
-});
+export const createUserSchema = z
+  .object({
+    email: z
+      .string({
+        required_error: "Email é obrigatório",
+        invalid_type_error: "Email deve ser uma string",
+      })
+      .email("Email inválido"),
+    password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+    confirmPassword: z
+      .string()
+      .min(6, "A senha deve ter no mínimo 6 caracteres"),
+    registration: z.string().min(1, "A matrícula é obrigatória"),
+    name: z.string().min(1, "O nome é obrigatório"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
+export const updateUserSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    email: z.string().optional(),
+    password: z.string().optional(),
+    confirmPassword: z.string().optional(),
+    registration: z.string().optional(),
+    name: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
