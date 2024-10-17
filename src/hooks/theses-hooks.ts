@@ -186,5 +186,33 @@ export function useTheses() {
       },
     });
 
-  return { getTheses, deleteThesis, createThesis, updateThesis, getThesesById };
+  const getThesesByYear = () => {
+    return useQuery({
+      queryKey: ["thesesByYear"],
+      queryFn: async () => {
+        const response = await api.get(`/theses/year`);
+        return response.data;
+      },
+    });
+  };
+
+  const getTopKeywords = () => {
+    return useQuery({
+      queryKey: ["topKeywords"],
+      queryFn: async () => {
+        const response = await api.get(`/theses/keywords`);
+        return response.data;
+      },
+    });
+  };
+
+  return {
+    getTheses,
+    deleteThesis,
+    createThesis,
+    updateThesis,
+    getThesesById,
+    getThesesByYear,
+    getTopKeywords,
+  };
 }

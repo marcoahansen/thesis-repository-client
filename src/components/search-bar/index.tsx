@@ -8,14 +8,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "../ui/button";
-import { ArrowDownNarrowWide, ArrowUpNarrowWide, Search } from "lucide-react";
+import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
 import { Label } from "../ui/label";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-
-const searchSchema = z.string();
+import { SearchInput } from "../search-input";
 
 interface SearchBarProps {
   orderByOptions: Array<{
@@ -32,28 +27,6 @@ export function SearchBar({ orderByOptions, placeholder }: SearchBarProps) {
   const search = searchParams.get("search") || "";
   const orderBy = searchParams.get("orderBy") || orderByOptions[0].value;
   const sort = searchParams.get("sort") || "asc";
-
-  const { register, setValue } = useForm({
-    mode: "onBlur",
-    resolver: zodResolver(searchSchema),
-  });
-
-  useEffect(() => {
-    setValue("search", search);
-  }, [search, setValue]);
-
-  const handleSearchChange = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const searchValue = formData.get("search") as string;
-    setSearchParams({
-      search: searchValue,
-      orderBy,
-      sort,
-      page: String(currentPage),
-      take: String(take),
-    });
-  };
 
   function handleOrderChange(value: string) {
     setSearchParams({
@@ -87,16 +60,7 @@ export function SearchBar({ orderByOptions, placeholder }: SearchBarProps) {
 
   return (
     <div className="flex justify-between items-end w-full mb-4">
-      <form onSubmit={handleSearchChange} className="flex gap-2 w-[60%]">
-        <Input
-          {...register("search")}
-          placeholder={placeholder ? placeholder : "Buscar..."}
-        />
-        <Button type="submit" size="icon">
-          <Search />
-        </Button>
-      </form>
-
+      <SearchInput placeholder={placeholder} orderByOptions={orderByOptions} />
       <div className="flex items-end gap-1">
         <div className="flex flex-col">
           <Label htmlFor="orderBy" className="text-xs text-muted-foreground">

@@ -7,12 +7,29 @@ import { PublicRoute } from "./public-route";
 import { Users } from "@/screens/users";
 import { Advisors } from "@/screens/advisors";
 import { Theses } from "@/screens/theses";
+import { Home } from "@/screens/home";
+import { ThesisDetails } from "@/screens/thesis-details";
+import { Navbar } from "@/components/navbar";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <div>Hello world!</div>,
+    element: (
+      <>
+        <Navbar />
+        <Home />
+      </>
+    ),
     errorElement: <ErrorPage />,
+  },
+  {
+    path: "/thesis/:thesisId",
+    element: (
+      <>
+        <Navbar />
+        <ThesisDetails />,
+      </>
+    ),
   },
   {
     path: "/signin",

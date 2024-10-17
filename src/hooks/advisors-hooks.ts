@@ -48,74 +48,94 @@ export function useAdvisors({
   const orderBy = searchParams.get("orderBy") || "name";
   const sort = searchParams.get("sort") || "asc";
 
-  const getAdvisors = useQuery<AdvisorsResponse>({
-    queryKey: ["advisors", currentPage, take, search, orderBy, sort],
-    queryFn: async () => {
-      const response = await api.get(
-        `/advisors?skip=${skip}&take=${take}&search=${search}&orderBy=${orderBy}&sort=${sort}`
-      );
-      return response.data;
-    },
-    enabled: enableGetAdvisors,
-  });
+  const getAdvisors = () => {
+    return useQuery<AdvisorsResponse>({
+      queryKey: ["advisors", currentPage, take, search, orderBy, sort],
+      queryFn: async () => {
+        const response = await api.get(
+          `/advisors?skip=${skip}&take=${take}&search=${search}&orderBy=${orderBy}&sort=${sort}`
+        );
+        return response.data;
+      },
+      enabled: enableGetAdvisors,
+    });
+  };
 
-  const getAllAdvisors = useQuery<Pick<Advisor, "name" | "id">[]>({
-    queryKey: ["allAdvisors"],
-    queryFn: async () => {
-      const response = await api.get("/advisors/all");
-      return response.data;
-    },
-    enabled: enabledGetAllAdvisors,
-  });
+  const getAllAdvisors = () => {
+    return useQuery<Pick<Advisor, "name" | "id">[]>({
+      queryKey: ["allAdvisors"],
+      queryFn: async () => {
+        const response = await api.get("/advisors/all");
+        return response.data;
+      },
+      enabled: enabledGetAllAdvisors,
+    });
+  };
 
-  const createAdvisor = useMutation({
-    mutationFn: async (advisor: CreateAdvisorInput) => {
-      const response = await api.post("/advisors/register", advisor);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["advisors", currentPage, take],
-      });
-      toast.success("Orientador criado com sucesso");
-    },
-    onError: (error) => {
-      console.error(error);
-      toast.error("Erro ao criar orientador");
-    },
-  });
+  const createAdvisor = () => {
+    return useMutation({
+      mutationFn: async (advisor: CreateAdvisorInput) => {
+        const response = await api.post("/advisors/register", advisor);
+        return response.data;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["advisors", currentPage, take],
+        });
+        toast.success("Orientador criado com sucesso");
+      },
+      onError: (error) => {
+        console.error(error);
+        toast.error("Erro ao criar orientador");
+      },
+    });
+  };
 
-  const updateAdvisor = useMutation({
-    mutationFn: async (advisor: UpdateAdvisorInput) => {
-      await api.put(`/advisors/${advisor.id}/update`, advisor);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["advisors", currentPage, take],
-      });
-      toast.success("Orientador atualizado com sucesso");
-    },
-    onError: (error) => {
-      console.error(error);
-      toast.error("Erro ao atualizar orientador");
-    },
-  });
+  const updateAdvisor = () => {
+    return useMutation({
+      mutationFn: async (advisor: UpdateAdvisorInput) => {
+        await api.put(`/advisors/${advisor.id}/update`, advisor);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["advisors", currentPage, take],
+        });
+        toast.success("Orientador atualizado com sucesso");
+      },
+      onError: (error) => {
+        console.error(error);
+        toast.error("Erro ao atualizar orientador");
+      },
+    });
+  };
 
-  const deleteAdvisor = useMutation({
-    mutationFn: async (id: string) => {
-      await api.delete(`/advisors/${id}/delete`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["advisors", currentPage, take],
-      });
-      toast.success("Orientador deletado com sucesso");
-    },
-    onError: (error) => {
-      console.error(error);
-      toast.error("Erro ao deletar orientador");
-    },
-  });
+  const deleteAdvisor = () => {
+    return useMutation({
+      mutationFn: async (id: string) => {
+        await api.delete(`/advisors/${id}/delete`);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["advisors", currentPage, take],
+        });
+        toast.success("Orientador deletado com sucesso");
+      },
+      onError: (error) => {
+        console.error(error);
+        toast.error("Erro ao deletar orientador");
+      },
+    });
+  };
+
+  const getTopAdvisors = () => {
+    return useQuery({
+      queryKey: ["topAdvisors"],
+      queryFn: async () => {
+        const response = await api.get("/advisors/top");
+        return response.data;
+      },
+    });
+  };
 
   return {
     getAdvisors,
@@ -123,5 +143,6 @@ export function useAdvisors({
     createAdvisor,
     updateAdvisor,
     deleteAdvisor,
+    getTopAdvisors,
   };
 }

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -13,12 +12,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface PaginationProps {
   totalPages: number;
   total: number;
+  isHome?: boolean;
 }
 
-export function Pagination({ totalPages, total }: PaginationProps) {
+export function Pagination({ totalPages, total, isHome }: PaginationProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = Number(searchParams.get("page") || 1);
-  const [take, setTake] = useState(Number(searchParams.get("take") || 10));
+  const take = Number(searchParams.get("take") || 10);
   const search = searchParams.get("search") || "";
   const orderBy = searchParams.get("orderBy") || "year";
   const sort = searchParams.get("sort") || "asc";
@@ -36,22 +36,22 @@ export function Pagination({ totalPages, total }: PaginationProps) {
   };
 
   const handleTakeChange = (newTake: string) => {
-    setTake(Number(newTake));
     setSearchParams({ page: "1", take: newTake, search, orderBy, sort });
   };
 
   return (
     <div className="flex justify-between items-center w-full">
       <div className="text-xs text-muted-foreground">
-        mostrando <strong>{take}</strong> de <strong>{total}</strong> itens
+        mostrando <strong>{total < 10 ? total : take}</strong> de{" "}
+        <strong>{total}</strong> itens
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="md:flex items-center gap-2 hidden">
         <label
           htmlFor="rows-per-page"
           className="text-xs text-muted-foreground"
         >
-          Linhas por página:
+          {isHome ? "Trabalhos por página:" : "Linhas por página:"}
         </label>
         <Select onValueChange={handleTakeChange} defaultValue={String(take)}>
           <SelectTrigger className="w-[80px]">

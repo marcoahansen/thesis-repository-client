@@ -34,8 +34,8 @@ export function AdvisorFormSheet({
   open: boolean;
 }) {
   const { createAdvisor, updateAdvisor } = useAdvisors();
-  const { mutate: createAdvisorMutate } = createAdvisor;
-  const { mutate: updateAdvisorMutate } = updateAdvisor;
+  const { mutate: createAdvisorMutate } = createAdvisor();
+  const { mutate: updateAdvisorMutate } = updateAdvisor();
 
   const {
     register,
