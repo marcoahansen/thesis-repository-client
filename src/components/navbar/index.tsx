@@ -42,80 +42,81 @@ export const Navbar = () => {
               <p className="flex flex-col">
                 Faeterj Petrópolis
                 <span className="text-sm font-medium">
-                  Trabalhos de Conclusão
+                  Trabalhos de Conclusão de Curso
                 </span>
               </p>
             </a>
           </NavigationMenuItem>
 
           {/* mobile */}
-          <span className="flex md:hidden">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger className="px-2">
-                <Menu
-                  className="flex md:hidden h-5 w-5"
-                  onClick={() => setIsOpen(true)}
-                >
-                  <span className="sr-only">Menu Icon</span>
-                </Menu>
-              </SheetTrigger>
+          <NavigationMenuItem>
+            <span className="flex md:hidden">
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger className="px-2">
+                  <Menu
+                    className="flex md:hidden h-5 w-5"
+                    onClick={() => setIsOpen(true)}
+                  >
+                    <span className="sr-only">Menu Icon</span>
+                  </Menu>
+                </SheetTrigger>
 
-              <SheetContent side={"left"}>
-                <nav className="flex flex-col justify-center items-center gap-2 mt-4">
-                  {routeList.map(({ href, label }: RouteProps) => (
+                <SheetContent side={"left"}>
+                  <nav className="flex flex-col justify-center items-center gap-2 mt-4">
+                    {routeList.map(({ href, label }: RouteProps) => (
+                      <a
+                        rel="noreferrer noopener"
+                        key={label}
+                        href={href}
+                        onClick={() => setIsOpen(false)}
+                        className={buttonVariants({ variant: "ghost" })}
+                      >
+                        {label}
+                      </a>
+                    ))}
                     <a
                       rel="noreferrer noopener"
-                      key={label}
-                      href={href}
-                      onClick={() => setIsOpen(false)}
-                      className={buttonVariants({ variant: "ghost" })}
+                      href="https://faeterj-petropolis.edu.br/"
+                      target="_blank"
+                      className={`w-[110px] border ${buttonVariants({
+                        variant: "default",
+                      })}`}
                     >
-                      {label}
+                      <ExternalLink className="mr-2 w-5 h-5" />
+                      Faeterj
                     </a>
-                  ))}
-                  <a
-                    rel="noreferrer noopener"
-                    href="https://faeterj-petropolis.edu.br/"
-                    target="_blank"
-                    className={`w-[110px] border ${buttonVariants({
-                      variant: "default",
-                    })}`}
-                  >
-                    <ExternalLink className="mr-2 w-5 h-5" />
-                    Faeterj
-                  </a>
-                </nav>
-              </SheetContent>
-            </Sheet>
-          </span>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </span>
+          </NavigationMenuItem>
 
           {/* desktop */}
-          <nav className="hidden md:flex gap-2">
-            {routeList.map((route: RouteProps, i) => (
+          <NavigationMenuItem>
+            <nav className="hidden md:flex gap-4">
+              {routeList.map((route: RouteProps, i) => (
+                <a
+                  key={i}
+                  rel="noreferrer noopener"
+                  href={route.href}
+                  className={`text-[17px] ${buttonVariants({
+                    variant: "link",
+                  })}`}
+                >
+                  {route.label}
+                </a>
+              ))}
               <a
                 rel="noreferrer noopener"
-                href={route.href}
-                key={i}
-                className={`text-[17px] ${buttonVariants({
-                  variant: "ghost",
-                })}`}
+                href="https://faeterj-petropolis.edu.br/"
+                target="_blank"
+                className={`${buttonVariants({ variant: "link" })}`}
               >
-                {route.label}
+                Faeterj Petrópolis
+                <ExternalLink className="ml-2 w-4 h-4" />
               </a>
-            ))}
-          </nav>
-
-          <div className="hidden md:flex gap-2">
-            <a
-              rel="noreferrer noopener"
-              href="https://faeterj-petropolis.edu.br/"
-              target="_blank"
-              className={`border ${buttonVariants({ variant: "default" })}`}
-            >
-              <ExternalLink className="mr-2 w-5 h-5" />
-              Faeterj Petrópolis
-            </a>
-          </div>
+            </nav>
+          </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
     </header>

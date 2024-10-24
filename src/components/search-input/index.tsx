@@ -56,7 +56,7 @@ export function SearchInput({ placeholder, orderByOptions }: SearchBarProps) {
         {...register("search")}
         placeholder={placeholder ? placeholder : "Buscar..."}
       />
-      <Button type="submit" size="icon">
+      <Button aria-label="Buscar" type="submit" size="icon">
         <Search />
       </Button>
     </form>

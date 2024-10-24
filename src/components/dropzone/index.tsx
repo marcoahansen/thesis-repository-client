@@ -47,7 +47,11 @@ const Dropzone: FC<{
           </span>{" "}
           para selecionar um arquivo ou arraste e solte
         </div>
-        <input {...getInputProps({ onChange })} />
+        <input
+          {...getInputProps({ onChange })}
+          type="file"
+          accept="application/pdf"
+        />
       </div>
     </div>
   );

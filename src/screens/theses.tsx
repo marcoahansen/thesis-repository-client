@@ -3,7 +3,6 @@ import {
   GraduationCap,
   Pencil,
   PlusCircle,
-  SquareUserRound,
   Trash,
   Users2,
 } from "lucide-react";
@@ -82,7 +81,7 @@ export function Theses() {
               <div className="flex gap-2 items-center">
                 <BookOpenCheck stroke="#014065" size={32} />
                 <CardTitle className="text-primary">
-                  Trabalhos de Conclusão
+                  Trabalhos de Conclusão de Curso
                 </CardTitle>
                 <div className="ml-auto flex items-center gap-2">
                   <Button
@@ -139,19 +138,21 @@ export function Theses() {
                           <TableCell>{thesis.year}</TableCell>
                           <TableCell>{thesis.author.name}</TableCell>
                           <TableCell>{thesis.author.advisor.name}</TableCell>
-                          <TableCell>
+                          <TableCell className="flex">
                             <Button
                               onClick={() => openThesisSheet(thesis)}
                               size="icon"
                               variant="link"
                               className="h-8"
+                              aria-label="Editar"
                             >
                               <Pencil />
                             </Button>
                             <Button
                               size="icon"
-                              variant="ghost"
+                              variant="link"
                               className="h-8"
+                              aria-label="Excluir"
                               onClick={() => {
                                 onDeleteThesis(thesis.id);
                               }}

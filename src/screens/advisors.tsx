@@ -123,10 +123,11 @@ export function Advisors() {
                         </TableCell>
                         <TableCell>{advisor.email}</TableCell>
                         <TableCell>{advisor.registration}</TableCell>
-                        <TableCell>
+                        <TableCell className="flex">
                           <Button
                             onClick={() => openAdvisorSheet(advisor)}
                             size="icon"
+                            aria-label="Editar"
                             variant="link"
                             className="h-8"
                           >
@@ -134,7 +135,8 @@ export function Advisors() {
                           </Button>
                           <Button
                             size="icon"
-                            variant="ghost"
+                            variant="link"
+                            aria-label="Excluir"
                             className="h-8"
                             onClick={() => {
                               onDeleteAdvisor(advisor.id);

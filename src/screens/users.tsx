@@ -123,18 +123,20 @@ export function Users() {
                         </TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.registration}</TableCell>
-                        <TableCell>
+                        <TableCell className="flex">
                           <Button
                             onClick={() => openUserSheet(user)}
                             size="icon"
                             variant="link"
+                            aria-label="Editar"
                             className="h-8"
                           >
                             <Pencil />
                           </Button>
                           <Button
                             size="icon"
-                            variant="ghost"
+                            variant="link"
+                            aria-label="Excluir"
                             className="h-8"
                             onClick={() => {
                               onDeleteUser(user.id);

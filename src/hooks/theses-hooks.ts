@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { Advisor } from "./advisors-hooks";
 import { z } from "zod";
 import { uploadThesis } from "@/helpers/upload-file";
+import { useState } from "react";
+import { AxiosResponse } from "axios";
 
 export interface ThesisResponse {
   thesis: Thesis[];
@@ -34,8 +36,18 @@ export interface Author {
   registration: string;
   advisor: Pick<Advisor, "name" | "id">;
 }
+export interface ThesisResponse {
+  title: string;
+  year: number;
+  fileUrl: string;
+  abstract: string;
+  keywords: string[];
+  author_name: string;
+  author_registration: string;
+  advisor_id: string;
+}
 
-const MAX_FILE_SIZE = 5000000;
+const MAX_FILE_SIZE = 15000000;
 
 function checkFileType(file: File) {
   if (file?.name) {
@@ -45,9 +57,23 @@ function checkFileType(file: File) {
   return false;
 }
 
+const currentYear = new Date().getFullYear();
+
+const validateYearRange = (year: number) => {
+  return year >= 2005 && year <= currentYear;
+};
+
 const thesisBaseSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
-  year: z.coerce.number().int().min(1, "O ano é obrigatório"),
+  year: z.coerce
+    .number()
+    .int()
+    .refine((year) => year.toString().length === 4, {
+      message: "O ano deve ter 4 dígitos.",
+    })
+    .refine(validateYearRange, {
+      message: `O ano deve estar entre 2005 e ${currentYear}.`,
+    }),
   abstract: z.string().min(1, "O resumo é obrigatório"),
   keywords: z.string().min(1, "As palavras-chave são obrigatórias"),
   author_name: z.string().min(1, "O nome do autor é obrigatório"),
@@ -66,7 +92,7 @@ export const createThesisSchema = thesisBaseSchema.extend({
     })
     .refine(
       (file) => file.size < MAX_FILE_SIZE,
-      "O arquivo deve ter no máximo 5MB."
+      "O arquivo deve ter no máximo 15MB."
     )
     .refine((file) => checkFileType(file), "O arquivo deve ser um PDF."),
 });
@@ -88,6 +114,11 @@ export function useTheses() {
   const search = searchParams.get("search") || "";
   const orderBy = searchParams.get("orderBy") || "year";
   const sort = searchParams.get("sort") || "asc";
+  const [progress, setProgress] = useState<number>(0);
+
+  const onProgress = (percentCompleted: number) => {
+    setProgress(percentCompleted);
+  };
 
   const getTheses = () =>
     useQuery<ThesisResponse>({
@@ -110,18 +141,19 @@ export function useTheses() {
       enabled: !!id,
     });
 
-  const removeSpaces = (str: string) => str.replace(/\s/g, "");
+  // const removeSpaces = (str: string) => str.replace(/\s/g, "");
+
   const createThesis = () =>
-    useMutation({
+    useMutation<AxiosResponse<ThesisResponse>, Error, CreateThesisInput>({
       mutationFn: async (thesis: CreateThesisInput) => {
-        const keyName = await uploadThesis(thesis.file);
+        const keyName = await uploadThesis(thesis.file, onProgress);
 
         return await api.post("/theses/register", {
           title: thesis.title,
           year: thesis.year,
           fileUrl: keyName,
           abstract: thesis.abstract,
-          keywords: removeSpaces(thesis.keywords).split(","),
+          keywords: thesis.keywords.trim().split(","),
           author_name: thesis.author_name,
           author_registration: thesis.author_registration,
           advisor_id: thesis.advisor_id,
@@ -136,15 +168,18 @@ export function useTheses() {
       onError: (error) => {
         console.error("Erro ao cadastrar trabalho:", error);
       },
+      onSettled: () => {
+        setProgress(0);
+      },
     });
 
   const updateThesis = () =>
-    useMutation({
+    useMutation<AxiosResponse<ThesisResponse>, Error, UpdateThesisInput>({
       mutationFn: async (thesis: UpdateThesisInput) => {
         let fileUrl = "";
 
         if (thesis.file) {
-          fileUrl = await uploadThesis(thesis.file);
+          fileUrl = await uploadThesis(thesis.file, onProgress);
         }
 
         return api.put(`/theses/${thesis.id}/update`, {
@@ -152,7 +187,7 @@ export function useTheses() {
           year: thesis.year,
           fileUrl: fileUrl || undefined,
           abstract: thesis.abstract,
-          keywords: removeSpaces(thesis.keywords).split(","),
+          keywords: thesis.keywords.trim().split(","),
           author_name: thesis.author_name,
           author_registration: thesis.author_registration,
           advisor_id: thesis.advisor_id,
@@ -166,6 +201,9 @@ export function useTheses() {
       },
       onError: (error) => {
         console.error("Erro ao cadastrar trabalho:", error);
+      },
+      onSettled: () => {
+        setProgress(0);
       },
     });
 
@@ -214,5 +252,6 @@ export function useTheses() {
     getThesesById,
     getThesesByYear,
     getTopKeywords,
+    progress,
   };
 }

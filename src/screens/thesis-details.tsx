@@ -20,11 +20,18 @@ import {
   BookText,
   Download,
 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { useLayoutEffect } from "react";
+
+import { Link, useLocation, useParams } from "react-router-dom";
 
 export function ThesisDetails() {
   const { getThesesById } = useTheses();
   const { thesisId } = useParams();
+  const location = useLocation();
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [location.pathname]);
 
   const { data: thesis, isLoading: isLoadingThesis } = getThesesById(thesisId);
 
@@ -85,7 +92,7 @@ export function ThesisDetails() {
               <CardFooter className="flex justify-center">
                 <Button asChild>
                   <a
-                    href={thesis.fileUrl}
+                    href={`https://pub-4f62267dbc8d4dee8152f8012fe4b34f.r2.dev/${thesis.fileUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

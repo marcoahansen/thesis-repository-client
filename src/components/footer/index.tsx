@@ -19,7 +19,7 @@ export const Footer = () => {
             <a
               rel="noreferrer noopener"
               href="https://maps.app.goo.gl/duYBNQSB8sDyUnih7"
-              className="opacity-60 hover:opacity-100"
+              className="text-gray-700 hover:text-primary border-primary hover:border-b-2"
               target="_blank"
             >
               Av. Getúlio Vargas 335, Quitandinha, Petrópolis, RJ, 25651-075
@@ -33,7 +33,7 @@ export const Footer = () => {
             <a
               rel="noreferrer noopener"
               href="mailto:contato@faeterj-petropolis.edu.br"
-              className="opacity-60 hover:opacity-100"
+              className="text-gray-700 hover:text-primary border-primary hover:border-b-2"
               target="_blank"
             >
               contato@faeterj-petropolis.edu.br
@@ -49,7 +49,7 @@ export const Footer = () => {
             rel="noreferrer noopener"
             target="_blank"
             href="https://www.linkedin.com/in/marco-a-hansen/"
-            className="text-primary transition-all border-primary hover:border-b-2"
+            className="text-primary font-bold transition-all border-primary hover:border-b-2"
           >
             Marco Hansen
           </a>

@@ -19,8 +19,8 @@ export interface Advisor {
 
 export const createAdvisorSchema = z.object({
   name: z.string().min(1, "O nome é obrigatório"),
-  registration: z.string().min(1, "A matrícula é obrigatória"),
-  email: z.string().email("Email inválido"),
+  registration: z.string().optional(),
+  email: z.string().optional(),
 });
 
 export type CreateAdvisorInput = z.infer<typeof createAdvisorSchema>;

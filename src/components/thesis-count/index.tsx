@@ -61,7 +61,7 @@ export function ThesisCount() {
               tickLine={false}
               axisLine={false}
               tickMargin={4}
-              tickFormatter={(value) => String(value).slice(2, 4)}
+              tickFormatter={(value) => String(value)}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <defs>

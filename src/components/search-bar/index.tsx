@@ -1,5 +1,4 @@
 import { useSearchParams } from "react-router-dom";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -67,7 +66,7 @@ export function SearchBar({ orderByOptions, placeholder }: SearchBarProps) {
             Ordenar por:
           </Label>
           <Select onValueChange={handleOrderChange} defaultValue={orderBy}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-[120px]" aria-label="Ordenar por">
               <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>
             <SelectContent>
@@ -79,7 +78,12 @@ export function SearchBar({ orderByOptions, placeholder }: SearchBarProps) {
             </SelectContent>
           </Select>
         </div>
-        <Button variant="link" size="icon" onClick={toggleSortOrder}>
+        <Button
+          variant="link"
+          size="icon"
+          aria-label="ordenação"
+          onClick={toggleSortOrder}
+        >
           {sort === "asc" ? <ArrowUpNarrowWide /> : <ArrowDownNarrowWide />}
         </Button>
         <Button variant="outline" onClick={handleClearFilters}>

@@ -34,6 +34,14 @@ import { Textarea } from "../ui/textarea";
 import { Dropzone, HasFile } from "../dropzone";
 import { Separator } from "../ui/separator";
 import { Link } from "react-router-dom";
+import { Progress } from "../ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { RotateCcwIcon } from "lucide-react";
 
 export function ThesisFormSheet({
   onClose,
@@ -44,14 +52,18 @@ export function ThesisFormSheet({
   thesis: Thesis | null;
   open: boolean;
 }) {
-  const { createThesis, updateThesis, getThesesById } = useTheses();
+  const { createThesis, updateThesis, getThesesById, progress } = useTheses();
   const { getAllAdvisors } = useAdvisors({
     enableGetAdvisors: false,
     enabledGetAllAdvisors: true,
   });
-  const { mutate: createThesisMutate } = createThesis();
-  const { mutate: updateThesisMutate } = updateThesis();
-  const { data: advisors, isLoading: isLoadingAdvisors } = getAllAdvisors;
+  const { mutate: createThesisMutate, isPending: isCreating } = createThesis();
+  const { mutate: updateThesisMutate, isPending: isUpdating } = updateThesis();
+  const {
+    data: advisors,
+    isLoading: isLoadingAdvisors,
+    refetch: refetchAdvisors,
+  } = getAllAdvisors();
 
   const { data: thesisById, isLoading: isLoadingThesisById } = getThesesById(
     thesis?.id
@@ -60,7 +72,7 @@ export function ThesisFormSheet({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, isDirty },
+    formState: { errors, isDirty },
     reset,
     setValue,
     control,
@@ -94,13 +106,14 @@ export function ThesisFormSheet({
           },
         }
       );
+    } else {
+      createThesisMutate(data as CreateThesisInput, {
+        onSuccess: () => {
+          reset();
+          onClose();
+        },
+      });
     }
-    createThesisMutate(data as CreateThesisInput, {
-      onSuccess: () => {
-        reset();
-        onClose();
-      },
-    });
   };
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -108,6 +121,12 @@ export function ThesisFormSheet({
       onClose();
       reset();
     }
+  };
+
+  const disabled = isCreating || isUpdating;
+
+  const sanitizeText = (text: string) => {
+    return text.replace(/\n+/g, " ").trim();
   };
 
   return (
@@ -189,6 +208,14 @@ export function ThesisFormSheet({
                         {String(errors.file.message)}
                       </span>
                     )}
+                    {progress > 0 && (
+                      <div className="flex-col items-center justify-between mt-6">
+                        <span className="text-sm text-gray-500">
+                          Fazendo upload do arquivo...
+                        </span>
+                        <Progress className="mt-2" value={progress} max={100} />
+                      </div>
+                    )}
                   </>
                 )}
               />
@@ -204,16 +231,37 @@ export function ThesisFormSheet({
                   render={({ field }) => (
                     <>
                       <Label htmlFor="advisor_id">Orientador</Label>
-                      <p className="text-xs my-1">
-                        Se o orientador não estiver na lista, cadastre-o na aba{" "}
-                        <Link
-                          className="text-blue-700 cursor-pointer hover:underline"
-                          to={"advisors"}
-                          target="_blank"
-                        >
-                          orientadores
-                        </Link>
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs my-1">
+                          Se o orientador não estiver na lista, cadastre-o na
+                          aba{" "}
+                          <Link
+                            className="text-blue-700 cursor-pointer hover:underline"
+                            to={"advisors"}
+                            target="_blank"
+                          >
+                            orientadores
+                          </Link>
+                        </p>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="link"
+                                size="icon"
+                                onClick={() => refetchAdvisors()}
+                              >
+                                <RotateCcwIcon className="w-4 h-4 hover:to-blue-500" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              Recarregar orientadores
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+
                       <Select
                         onValueChange={(value) => field.onChange(value)}
                         value={field.value || ""}
@@ -249,9 +297,12 @@ export function ThesisFormSheet({
               <div>
                 <Label htmlFor="abstract">Resumo</Label>
                 <Textarea
-                  className="h-40"
+                  className="h-40 textarea-no-break"
                   placeholder="Digite o resumo"
-                  {...register("abstract")}
+                  {...register("abstract", {
+                    onChange: (e) =>
+                      setValue("abstract", sanitizeText(e.target.value)),
+                  })}
                   error={inputError(errors, "abstract")}
                 />
               </div>
@@ -275,16 +326,16 @@ export function ThesisFormSheet({
                 onClose();
                 reset();
               }}
-              disabled={isSubmitting}
+              disabled={disabled}
             >
               Cancelar
             </Button>
             <Button
               className="grid col-span-2"
               type="submit"
-              disabled={isSubmitting || !isDirty}
+              disabled={disabled || !isDirty}
             >
-              {isSubmitting ? "Salvando..." : "Salvar trabalho"}
+              {disabled ? "Salvando..." : "Salvar trabalho"}
             </Button>
           </SheetFooter>
         </form>

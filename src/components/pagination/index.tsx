@@ -54,7 +54,7 @@ export function Pagination({ totalPages, total, isHome }: PaginationProps) {
           {isHome ? "Trabalhos por página:" : "Linhas por página:"}
         </label>
         <Select onValueChange={handleTakeChange} defaultValue={String(take)}>
-          <SelectTrigger className="w-[80px]">
+          <SelectTrigger className="w-[80px]" aria-label="Trabalhos por página">
             <SelectValue placeholder={String(take)} />
           </SelectTrigger>
           <SelectContent>
@@ -69,6 +69,7 @@ export function Pagination({ totalPages, total, isHome }: PaginationProps) {
         <Button
           size="icon"
           variant="outline"
+          aria-label="Página anterior"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -80,6 +81,7 @@ export function Pagination({ totalPages, total, isHome }: PaginationProps) {
         <Button
           size="icon"
           variant="outline"
+          aria-label="Próxima página"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
