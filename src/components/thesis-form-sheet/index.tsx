@@ -160,6 +160,7 @@ export function ThesisFormSheet({
               <Label htmlFor="year">Ano</Label>
               <Input
                 type="number"
+                min={2005}
                 placeholder="Digite o ano"
                 {...register("year", { required: true })}
                 error={inputError(errors, "year")}

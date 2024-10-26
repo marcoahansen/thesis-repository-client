@@ -42,8 +42,8 @@ export function Pagination({ totalPages, total, isHome }: PaginationProps) {
   return (
     <div className="flex justify-between items-center w-full">
       <div className="text-xs text-muted-foreground">
-        mostrando <strong>{total < 10 ? total : take}</strong> de{" "}
-        <strong>{total}</strong> itens
+        mostrando <strong>{total < 10 || total < take ? total : take}</strong>{" "}
+        de <strong>{total}</strong> itens
       </div>
 
       <div className="md:flex items-center gap-2 hidden">
