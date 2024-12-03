@@ -25,8 +25,6 @@ import {
 import { useAdvisors } from "@/hooks/advisors-hooks";
 import { Loading } from "../loading";
 
-export const description = "A bar chart with a custom label";
-
 const chartConfig = {
   name: {
     label: "Nome do Orientador",
@@ -41,19 +39,27 @@ export function TopAdvisors() {
   if (isLoading) {
     return <Loading />;
   }
+
+  const topAdvisorsWithSmallNames = topAdvisors.map(
+    (advisor: { name: string; authors: number }) => ({
+      ...advisor,
+      name: advisor.name.split(" ").slice(0, 2).join(" "),
+    })
+  );
+
   return (
     <Card className="md:break-inside-avoid overflow-hidden min-h-64 drop-shadow-md shadow-black/10">
       <CardHeader>
         <CardTitle>Orientadores</CardTitle>
         <CardDescription>
-          Mostrando a lista dos orientadores por orientandos
+          Mostrando a lista dos orientadores com mais orientandos
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
-            data={topAdvisors}
+            data={topAdvisorsWithSmallNames}
             layout="vertical"
             margin={{
               right: 16,
@@ -66,7 +72,6 @@ export function TopAdvisors() {
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
               hide
             />
             <XAxis dataKey="authors" type="number" hide />
@@ -83,6 +88,13 @@ export function TopAdvisors() {
               <LabelList
                 dataKey="name"
                 position="insideLeft"
+                offset={8}
+                className="fill-current text-primary"
+                fontSize={12}
+              />
+              <LabelList
+                dataKey="authors"
+                position="right"
                 offset={8}
                 className="fill-current text-primary"
                 fontSize={12}

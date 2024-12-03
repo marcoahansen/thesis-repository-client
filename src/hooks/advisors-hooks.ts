@@ -80,7 +80,7 @@ export function useAdvisors({
       },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["advisors", currentPage, take],
+          queryKey: ["advisors", currentPage, take, search, orderBy, sort],
         });
         toast.success("Orientador criado com sucesso");
       },
@@ -98,7 +98,7 @@ export function useAdvisors({
       },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["advisors", currentPage, take],
+          queryKey: ["advisors", currentPage, take, search, orderBy, sort],
         });
         toast.success("Orientador atualizado com sucesso");
       },
@@ -116,7 +116,7 @@ export function useAdvisors({
       },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["advisors", currentPage, take],
+          queryKey: ["advisors", currentPage, take, search, orderBy, sort],
         });
         toast.success("Orientador deletado com sucesso");
       },

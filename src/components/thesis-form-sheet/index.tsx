@@ -302,7 +302,9 @@ export function ThesisFormSheet({
                   placeholder="Digite o resumo"
                   {...register("abstract", {
                     onChange: (e) =>
-                      setValue("abstract", sanitizeText(e.target.value)),
+                      setValue("abstract", e.target.value, {
+                        shouldValidate: true,
+                      }),
                   })}
                   error={inputError(errors, "abstract")}
                 />

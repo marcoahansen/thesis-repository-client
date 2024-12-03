@@ -17,7 +17,6 @@ async function uploadThesis(
           ? (progressEvent.loaded * 100) / progressEvent.total
           : 0
       );
-      console.log(percentCompleted);
       onProgress(percentCompleted);
     },
   });

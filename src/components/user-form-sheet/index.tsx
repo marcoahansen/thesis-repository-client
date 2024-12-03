@@ -137,7 +137,7 @@ export function UserFormSheet({
             <div className="grid gap-1">
               <Label htmlFor="password">Confirmação Senha</Label>
               <Input
-                id="password"
+                id="confirm-password"
                 type="password"
                 placeholder="****"
                 {...register("confirmPassword")}

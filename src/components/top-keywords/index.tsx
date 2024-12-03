@@ -85,6 +85,13 @@ export function TopKeywords() {
                 className="fill-current text-primary"
                 fontSize={12}
               />
+              <LabelList
+                dataKey="count"
+                position="right"
+                offset={8}
+                className="fill-current text-primary"
+                fontSize={12}
+              />
             </Bar>
           </BarChart>
         </ChartContainer>

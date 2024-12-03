@@ -51,8 +51,11 @@ export function AdvisorFormSheet({
   useEffect(() => {
     if (advisor) {
       setValue("name", advisor.name);
-      setValue("email", advisor.email);
-      setValue("registration", advisor.registration);
+      setValue("email", advisor.email ? advisor.email : "");
+      setValue(
+        "registration",
+        advisor.registration ? advisor.registration : ""
+      );
       trigger();
     }
   }, [advisor, setValue, trigger]);
