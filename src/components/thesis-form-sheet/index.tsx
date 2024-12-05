@@ -125,9 +125,9 @@ export function ThesisFormSheet({
 
   const disabled = isCreating || isUpdating;
 
-  const sanitizeText = (text: string) => {
-    return text.replace(/\n+/g, " ").trim();
-  };
+  // const sanitizeText = (text: string) => {
+  //   return text.replace(/\n+/g, " ").trim();
+  // };
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
