@@ -1,6 +1,6 @@
-# Cliente do Repositório de Teses
+# Cliente do Repositório de TCCs
 
-Este projeto é um cliente para o repositório de teses, desenvolvido com **React** e **Vite**, utilizando **TypeScript**.
+Este projeto é um cliente para o repositório de TCCs, desenvolvido com **React** e **Vite**, utilizando **TypeScript**.
 
 ## Tabela de Conteúdos
 
@@ -14,7 +14,7 @@ Este projeto é um cliente para o repositório de teses, desenvolvido com **Reac
 
 ## Visão Geral
 
-Este cliente permite aos usuários interagir com o repositório de teses, oferecendo funcionalidades para submissão, visualização e pesquisa de teses. Ele é construído com uma interface moderna e responsiva.
+Este cliente permite aos usuários interagir com o repositório de TCCs, oferecendo funcionalidades para submissão, visualização e pesquisa de TCCs. Ele é construído com uma interface moderna e responsiva.
 
 ## Tecnologias
 
