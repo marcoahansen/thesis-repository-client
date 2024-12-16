@@ -1,0 +1,12 @@
+node_modules
+
+*.log
+
+dist
+build
+
+Dockerfile
+docker-compose.yml
+
+.DS_Store
+Thumbs.db
