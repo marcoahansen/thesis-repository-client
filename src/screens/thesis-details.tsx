@@ -24,6 +24,8 @@ import { useLayoutEffect } from "react";
 
 import { Link, useLocation, useParams } from "react-router-dom";
 
+const BUCKET_URL = import.meta.env.VITE_BUCKET_URL;
+
 export function ThesisDetails() {
   const { getThesesById } = useTheses();
   const { thesisId } = useParams();
@@ -92,7 +94,7 @@ export function ThesisDetails() {
               <CardFooter className="flex justify-center">
                 <Button asChild>
                   <a
-                    href={`https://pub-4f62267dbc8d4dee8152f8012fe4b34f.r2.dev/${thesis.fileUrl}`}
+                    href={`${BUCKET_URL}${thesis.fileUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
