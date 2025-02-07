@@ -63,6 +63,16 @@ const validateYearRange = (year: number) => {
   return year >= 2005 && year <= currentYear;
 };
 
+const fileValidation = z
+  .instanceof(File, {
+    message: "O arquivo é obrigatório",
+  })
+  .refine(
+    (file) => file.size < MAX_FILE_SIZE,
+    "O arquivo deve ter no máximo 15MB."
+  )
+  .refine((file) => checkFileType(file), "O arquivo deve ser um PDF.");
+
 const thesisBaseSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   year: z.coerce
@@ -83,24 +93,28 @@ const thesisBaseSchema = z.object({
       required_error: "O orientador é obrigatório",
     })
     .uuid("O orientador é obrigatório"),
+  fileKey: z.string().optional(),
 });
 
 export const createThesisSchema = thesisBaseSchema.extend({
-  file: z
-    .instanceof(File, {
-      message: "O arquivo é obrigatório",
-    })
-    .refine(
-      (file) => file.size < MAX_FILE_SIZE,
-      "O arquivo deve ter no máximo 15MB."
-    )
-    .refine((file) => checkFileType(file), "O arquivo deve ser um PDF."),
+  file: fileValidation,
 });
 
-export const updateThesisSchema = thesisBaseSchema.extend({
-  id: z.string().uuid().optional(),
-  file: z.instanceof(File).optional(),
-});
+export const updateThesisSchema = thesisBaseSchema
+  .extend({
+    id: z.string().uuid().optional(),
+    file: fileValidation.optional(),
+    fileKey: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.fileKey && !data.file) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "É necessário enviar um novo arquivo após deletar o anterior",
+        path: ["file"],
+      });
+    }
+  });
 
 export type CreateThesisInput = z.infer<typeof createThesisSchema>;
 export type UpdateThesisInput = z.infer<typeof updateThesisSchema>;
@@ -224,6 +238,20 @@ export function useTheses() {
       },
     });
 
+  const deleteFile = () =>
+    useMutation({
+      mutationFn: async (fileKey: string) => {
+        await api.delete(`theses/file/${fileKey}`);
+      },
+      onSuccess: () => {
+        toast.success("Arquivo deletado com sucesso, adicione um novo");
+      },
+      onError: (error) => {
+        console.error("Erro ao deletar arquivo:", error);
+        toast.error("Erro ao deletar arquivo");
+      },
+    });
+
   const getThesesByYear = () => {
     return useQuery({
       queryKey: ["thesesByYear"],
@@ -253,5 +281,6 @@ export function useTheses() {
     getThesesByYear,
     getTopKeywords,
     progress,
+    deleteFile,
   };
 }

@@ -12,7 +12,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { inputError } from "@/helpers/input-error";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { removeEmptyFields } from "@/helpers/remove-empty-fields";
 import {
   CreateThesisInput,
@@ -41,7 +41,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { RotateCcwIcon } from "lucide-react";
+import {
+  FileSymlink,
+  FileText,
+  Loader2,
+  RotateCcwIcon,
+  Trash,
+} from "lucide-react";
+import { ConfirmationDialog } from "../confirm-dialog";
+
+const BUCKET_URL = import.meta.env.VITE_BUCKET_URL;
 
 export function ThesisFormSheet({
   onClose,
@@ -52,18 +61,28 @@ export function ThesisFormSheet({
   thesis: Thesis | null;
   open: boolean;
 }) {
-  const { createThesis, updateThesis, getThesesById, progress } = useTheses();
+  const { createThesis, updateThesis, getThesesById, progress, deleteFile } =
+    useTheses();
   const { getAllAdvisors } = useAdvisors({
     enableGetAdvisors: false,
     enabledGetAllAdvisors: true,
   });
   const { mutate: createThesisMutate, isPending: isCreating } = createThesis();
   const { mutate: updateThesisMutate, isPending: isUpdating } = updateThesis();
+  const { mutate: deleteFileMutate, isPending: isDeletingFile } = deleteFile();
   const {
     data: advisors,
     isLoading: isLoadingAdvisors,
     refetch: refetchAdvisors,
   } = getAllAdvisors();
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [deletingFile, setDeletingFile] = useState<string>("");
+
+  function onDeleteFile(fileKey: string) {
+    setDeletingFile(fileKey);
+    setOpenDialog(true);
+  }
 
   const { data: thesisById, isLoading: isLoadingThesisById } = getThesesById(
     thesis?.id
@@ -76,9 +95,16 @@ export function ThesisFormSheet({
     reset,
     setValue,
     control,
+    watch,
+    trigger,
   } = useForm<CreateThesisInput | UpdateThesisInput>({
     resolver: zodResolver(thesis ? updateThesisSchema : createThesisSchema),
+    defaultValues: {
+      fileKey: undefined,
+    },
   });
+
+  const fileKey = watch("fileKey");
 
   useEffect(() => {
     if (thesis) {
@@ -90,11 +116,12 @@ export function ThesisFormSheet({
         setValue("author_name", thesisById.author.name);
         setValue("author_registration", thesisById.author.registration);
         setValue("advisor_id", thesisById.author.advisor.id);
+        setValue("fileKey", thesisById.fileUrl);
       }
     }
-  }, [thesis, getThesesById, setValue]);
+  }, [thesis, thesisById, isLoadingThesisById, setValue]);
 
-  const onSubmit = (data: CreateThesisInput | UpdateThesisInput) => {
+  const onSubmit = async (data: CreateThesisInput | UpdateThesisInput) => {
     if (thesis) {
       const normalizedData = removeEmptyFields(data) as UpdateThesisInput;
       updateThesisMutate(
@@ -125,9 +152,103 @@ export function ThesisFormSheet({
 
   const disabled = isCreating || isUpdating;
 
-  // const sanitizeText = (text: string) => {
-  //   return text.replace(/\n+/g, " ").trim();
-  // };
+  const renderFileField = () => (
+    <div>
+      <Controller
+        name="file"
+        control={control}
+        rules={{
+          validate: (value) => {
+            if (!fileKey && !value) {
+              return "É necessário fazer upload de um novo arquivo";
+            }
+            return true;
+          },
+        }}
+        render={({ field }) => (
+          <>
+            <Label htmlFor="file">Arquivo</Label>
+            {thesisById && fileKey ? (
+              <div className="flex items-center space-x-4 rounded-md border p-4">
+                <FileText stroke="#014065" />
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm leading-none">
+                    {thesisById.fileUrl.slice(16)}
+                  </p>
+                </div>
+                <div>
+                  <Button
+                    size="icon"
+                    variant="link"
+                    type="button"
+                    className="h-8"
+                    aria-label="Ver arquivo"
+                    asChild
+                  >
+                    <a
+                      href={`${BUCKET_URL}${thesisById.fileUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FileSymlink />
+                    </a>
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="link"
+                    type="button"
+                    className="h-8"
+                    aria-label="Excluir"
+                    onClick={() => {
+                      onDeleteFile(thesisById.fileUrl);
+                    }}
+                  >
+                    {isDeletingFile ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <Trash color="red" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : field.value ? (
+              <HasFile
+                file={field.value}
+                removeFile={() => {
+                  field.onChange(null);
+                  setValue("file", undefined, { shouldValidate: true });
+                }}
+              />
+            ) : (
+              <Dropzone
+                onChange={(e) => {
+                  if (e.target.files) {
+                    field.onChange(e.target.files[0]);
+                    setValue("file", e.target.files[0], {
+                      shouldValidate: true,
+                    });
+                  }
+                }}
+              />
+            )}
+            {errors.file && (
+              <span className="text-red-600 text-xs">
+                {String(errors.file.message)}
+              </span>
+            )}
+            {progress > 0 && (
+              <div className="flex-col items-center justify-between mt-6">
+                <span className="text-sm text-gray-500">
+                  Fazendo upload do arquivo...
+                </span>
+                <Progress className="mt-2" value={progress} max={100} />
+              </div>
+            )}
+          </>
+        )}
+      />
+    </div>
+  );
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
@@ -183,44 +304,7 @@ export function ThesisFormSheet({
                 error={inputError(errors, "author_registration")}
               />
             </div>
-            <div>
-              <Controller
-                name="file"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <Label htmlFor="file">Arquivo</Label>
-                    {field.value ? (
-                      <HasFile
-                        file={field.value}
-                        removeFile={() => field.onChange(null)}
-                      />
-                    ) : (
-                      <Dropzone
-                        onChange={(e) => {
-                          if (e.target.files) {
-                            field.onChange(e.target.files[0]);
-                          }
-                        }}
-                      />
-                    )}
-                    {errors.file && (
-                      <span className="text-red-600 text-xs">
-                        {String(errors.file.message)}
-                      </span>
-                    )}
-                    {progress > 0 && (
-                      <div className="flex-col items-center justify-between mt-6">
-                        <span className="text-sm text-gray-500">
-                          Fazendo upload do arquivo...
-                        </span>
-                        <Progress className="mt-2" value={progress} max={100} />
-                      </div>
-                    )}
-                  </>
-                )}
-              />
-            </div>
+            {renderFileField()}
           </div>
           <div className="flex col-span-1">
             <Separator className="h-auto mr-4" orientation="vertical" />
@@ -343,6 +427,19 @@ export function ThesisFormSheet({
           </SheetFooter>
         </form>
       </SheetContent>
+      <ConfirmationDialog
+        open={openDialog}
+        onDelete={() =>
+          deleteFileMutate(deletingFile, {
+            onSuccess: () => {
+              setValue("fileKey", undefined);
+              trigger("file");
+            },
+          })
+        }
+        setOpen={setOpenDialog}
+        item="arquivo"
+      />
     </Sheet>
   );
 }
